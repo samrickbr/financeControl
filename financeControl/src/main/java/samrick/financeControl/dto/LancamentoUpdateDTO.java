@@ -1,15 +1,17 @@
 package samrick.financeControl.dto;
 
-import jakarta.validation.constraints.*;
-import samrick.financeControl.model.TipoLancamento;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-public record LancamentoRequestDTO(
+public record LancamentoUpdateDTO(
 
-        @NotNull(message = "O tipo é obrigatório!")
-        TipoLancamento tipo,
+        @NotNull
+        String tipo,
         @Positive
         BigDecimal valor,
         @NotNull
@@ -22,6 +24,9 @@ public record LancamentoRequestDTO(
         @NotNull @Size(min = 5, message = "O campo deve ter no mínimo 5 caracteres")
         String categoria,
         @NotNull
-        Long usuarioID
+        Long usuarioID,
+
+        @NotBlank(message = "A justificativa é obrigatória para realizar alterações.")
+        String justificativa
 ) {
 }

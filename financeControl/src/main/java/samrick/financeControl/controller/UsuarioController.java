@@ -5,10 +5,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import samrick.financeControl.dto.ExclusaoRequestDTO;
 import samrick.financeControl.dto.UsuarioRequestDTO;
 import samrick.financeControl.dto.UsuarioResponseDTO;
-import samrick.financeControl.model.Usuario;
+import samrick.financeControl.dto.UsuarioUpdateDTO;
 import samrick.financeControl.service.UsuarioService;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/usuarios")
@@ -19,18 +24,40 @@ public class UsuarioController {
 
     @PostMapping
     public ResponseEntity<UsuarioResponseDTO> salvar(@Valid @RequestBody UsuarioRequestDTO dados) {
-        UsuarioResponseDTO response = service.salvar(dados);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.salvar(dados));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Usuario> buscarUsuario(@PathVariable Long id) {
-        System.out.println("Buscando usuário: " + id);
-        Usuario usuarioEncontrado = service.buscarPorId(id);
-        if (usuarioEncontrado == null) {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<UsuarioResponseDTO> buscarUsuario(@PathVariable Long id) {
+        UsuarioResponseDTO usuarioEncontrado = service.buscarPorId(id);
         return ResponseEntity.ok(usuarioEncontrado);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Map<String, Object>> excluir(@PathVariable Long id, @RequestBody @Valid ExclusaoRequestDTO request){
+        service.excluir(id, request.justificativa());
+
+        Map<String, Object> resposta = new HashMap<>();
+        resposta.put("messagem", "Usuário ID " + id + " excluído com sucesso!");
+        return ResponseEntity.ok(resposta);
+    }
+
+    @GetMapping("/busca")
+    public ResponseEntity<List<UsuarioResponseDTO>> buscarPorNome(@RequestParam String nome) {
+        List<UsuarioResponseDTO> usuarios = service.buscarPorNome(nome);
+        return ResponseEntity.ok(usuarios);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Map<String, Object>> atualizar(@PathVariable Long id, @RequestBody @Valid UsuarioUpdateDTO dados) {
+        // 1. Chama o service para atualizar e pegar os dados novos
+        UsuarioResponseDTO usuarioAtualizado = service.atualizar(id, dados);
+
+        // 2. Cria o "pacote" de resposta
+        Map<String, Object> resposta = new HashMap<>();
+        resposta.put("mensagem", "O Usuário ID " + id + " foi atualizado com sucesso! ✅");
+        resposta.put("dados", usuarioAtualizado);
+
+        return ResponseEntity.ok(resposta);
+    }
 }

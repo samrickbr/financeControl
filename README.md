@@ -1,71 +1,215 @@
-# FinanceControl API 💰
+# 💰 FinanceControl API
 
-Repositório do projeto **FinanceControl**, uma API robusta desenvolvida em **Java** e **Spring Boot** para controle financeiro pessoal e de pequenos negócios (como oficinas mecânicas). O foco principal é a organização de lançamentos (Receitas/Despesas) vinculados a usuários cadastrados.
+API REST desenvolvida em **Java + Spring Boot** para controle financeiro pessoal e de pequenos negócios (ex: oficinas, prestadores de serviço).
 
-## 🛠️ Tecnologias e Ferramentas
-* **Java 17** (Linguagem principal)
-* **Spring Boot 3** (Framework para API)
-* **IntelliJ IDEA** (IDE de desenvolvimento)
-* **Maven** (Gerenciador de dependências e build)
-* **PostgreSQL** (Banco de dados relacional)
-* **Spring Data JPA** (Persistência de dados)
-* **Bean Validation (@Valid)** (Integridade dos dados)
-* **Lombok** (Produtividade no código)
-* **Postman** (Testes de endpoints)
+O sistema permite o gerenciamento completo de usuários e lançamentos financeiros (**receitas e despesas**), com foco em **organização, rastreabilidade e integridade dos dados**.
 
-## 🚀 Estado Atual do Projeto
-Atualmente, a API possui as seguintes funcionalidades implementadas e testadas:
-* **CRUD de Usuários:** Cadastro com validação de e-mail único, CPF (11 dígitos) e campos obrigatórios.
-* **Gestão de Lançamentos:** Registro de movimentações financeiras vinculadas a um usuário existente através de DTOs.
-* **Arquitetura DTO:** Separação total entre as entidades do banco de dados e os dados de entrada/saída (Request/Response DTO), garantindo que senhas e dados sensíveis não sejam expostos.
-* **Tratamento de Erros Global:** Centralizador de exceções (@RestControllerAdvice) que retorna mensagens amigáveis em português para:
-    * Campos vazios ou que violam regras de tamanho (400 Bad Request).
-    * Tentativa de cadastro de e-mails duplicados.
-    * IDs de usuários não encontrados no sistema.
-    * Erros de sintaxe no JSON ou valores de Enums incorretos.
+---
 
-## 📋 Como Testar (Exemplo de JSON)
-### Salvar Lançamento (`POST /lancamentos`)
+## 🚀 Objetivo do Projeto
+
+Este projeto foi desenvolvido com foco em:
+
+* Aplicar boas práticas de desenvolvimento backend
+* Implementar arquitetura em camadas (Controller, Service, Repository)
+* Garantir validação e consistência dos dados
+* Simular regras reais de negócio (auditoria, rastreabilidade e controle financeiro)
+
+---
+
+## 🛠️ Tecnologias Utilizadas
+
+* Java 17+
+* Spring Boot 3
+* Spring Data JPA
+* PostgreSQL
+* Maven
+* Bean Validation (`@Valid`, `@NotNull`, etc.)
+* BCrypt (criptografia de senha)
+* Jackson (serialização/desserialização JSON)
+* Lombok
+* Postman (testes de API)
+
+---
+
+## 🧱 Arquitetura do Projeto
+
+O projeto segue o padrão de **arquitetura em camadas**, com separação clara de responsabilidades:
+
+```text
+src/main/java/com/samrick/financecontrol/
+├── controller/   # Endpoints REST
+├── dto/          # Request e Response (Records)
+├── mapper/       # Conversão entre Entidades e DTOs
+├── service/      # Regras de negócio
+├── repository/   # Acesso ao banco de dados
+├── model/        # Entidades JPA
+├── infra/        # Tratamento global de exceções
+├── exceptions/   # Classes de erro padronizadas
+└── config/       # Configurações da aplicação
+```
+
+---
+
+## 🔥 Funcionalidades Implementadas
+
+### 👤 Usuários
+
+* Cadastro com validação de e-mail único
+* Criptografia de senha com BCrypt
+
+---
+
+### 💸 Lançamentos Financeiros
+
+* Cadastro de receitas e despesas
+* Associação com usuário
+* Validação de dados obrigatórios
+* Conversão segura de tipos (ENUM)
+
+---
+
+### 📜 Auditoria de Dados
+
+Sistema de rastreabilidade com:
+
+* Registro de ações: **CADASTRAR, ALTERAR, EXCLUIR**
+* Armazenamento do estado anterior (JSON)
+* Justificativa obrigatória para alterações
+
+💡 Ideal para cenários que exigem controle e histórico de mudanças
+
+---
+
+### ⚠️ Tratamento de Erros
+
+* Uso de `@RestControllerAdvice`
+* Respostas padronizadas para erros de validação e negócio
+* Mensagens claras para o cliente da API
+
+---
+
+## 📡 Exemplos de Uso da API
+
+### ➕ Criar usuário
+
+**POST /usuarios**
+
 ```json
 {
-    "tipo": "DESPESA",
-    "valor": 150.00,
-    "dataVencimento": "2026-03-30",
-    "descricao": "Troca de óleo - Cliente X",
-    "categoria": "Oficina",
-    "usuarioId": 1
+  "nome": "Rick",
+  "email": "rick@email.com",
+  "senha": "123456",
+  "cpf": "12345678901",
+  "profissao": "Desenvolvedor"
 }
 ```
 
-## 📈 Próximos Passos
+---
 
- * [ ] Implementar a listagem de lançamentos com filtros por tipo (Receita/Despesa).
+### 💸 Criar lançamento
 
- * [ ] Adicionar autenticação e segurança com Spring Security & JWT.
+**POST /lancamentos**
 
- * [ ] Criar relatórios de saldo mensal por usuário.
-
-* [ ] Implementar a funcionalidade de "Soft Delete" para usuários e lançamentos.
-
-## 💡 Como rodar o projeto
-
-   1. Clone o repositório: 
-```bash
-    git clone [https://github.com/samrickbr/financeControl.git] (https://github.com/samrickbr/financeControl.git)
+```json
+{
+  "tipo": "RECEITA",
+  "valor": 150.00,
+  "dataVencimento": "2026-04-10",
+  "descricao": "Serviço realizado",
+  "categoria": "Oficina",
+  "usuarioId": 1
+}
 ```
-   2. Configure as credenciais do seu PostgreSQL no arquivo `application.properties`.
 
-No arquivo `src/main/resources/application.properties`, configure as seguintes propriedades:
+---
+
+### ✏️ Atualizar lançamento (com auditoria)
+
+**PUT /lancamentos/{id}**
+
+```json
+{
+  "descricao": "Troca de óleo - Revisão",
+  "valor": 180.00,
+  "dataVencimento": "2026-04-05",
+  "categoria": "Oficina",
+  "tipo": "RECEITA",
+  "usuarioId": 1,
+  "justificativa": "Atualização de valor conforme tabela 2026"
+}
+```
+
+---
+
+## ▶️ Como Executar o Projeto
+
+### 1. Clonar o repositório
+
+```bash
+git clone https://github.com/samrickbr/financeControl.git
+```
+
+---
+
+### 2. Configurar o banco de dados
+
+No arquivo:
+
+```properties
+src/main/resources/application.properties
+```
+
+Configure:
 
 ```properties
 spring.datasource.url=jdbc:postgresql://localhost:5432/finance_db
 spring.datasource.username=seu_usuario
 spring.datasource.password=sua_senha
+
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=true
 ```
-   3. Execute o projeto via IntelliJ ou terminal:
-```Bash
-    mvn spring-boot:run
+
+---
+
+### 3. Executar a aplicação
+
+```bash
+mvn spring-boot:run
 ```
-Desenvolvido por [Ricardo Rick](https://github.com/samrickbr) 🛠️💻
+
+---
+
+## 📈 Próximas Melhorias
+
+* [x] Implementar Logs de Auditoria para todas as entidades críticas
+* [ ] Validação de CPF
+* [ ] Autenticação com Spring Security + JWT
+* [ ] Relatórios financeiros por usuário (mensal/anual)
+* [ ] Soft Delete para usuários e lançamentos
+* [ ] Documentação com Swagger/OpenAPI
+
+---
+
+## 👨‍💻 Autor
+
+**Rick (Ricardo)**
+Desenvolvedor Backend Java / Spring Boot
+
+🔗 GitHub: https://github.com/samrickbr
+
+---
+
+## 📌 Considerações Finais
+
+Este projeto foi desenvolvido com foco em:
+
+* Código limpo (Clean Code)
+* Boas práticas de API REST
+* Estrutura escalável
+* Simulação de regras reais de negócio
+
+---
+
+🚀 Projeto em evolução contínua.

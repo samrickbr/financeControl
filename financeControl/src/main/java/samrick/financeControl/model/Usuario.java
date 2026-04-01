@@ -2,6 +2,7 @@ package samrick.financeControl.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import samrick.financeControl.dto.UsuarioRequestDTO;
 
 @Entity
 @Table(name = "usuarios")
@@ -24,6 +25,14 @@ public class Usuario {
     private String profissao;
 
     public Usuario() {
+    }
+
+    public Usuario(UsuarioRequestDTO dados){
+        this.nome = dados.nome();
+        this.email = dados.email();
+        this.cpf = dados.cpf();
+        this.profissao = dados.profissao();
+        this.senha = dados.senha();
     }
 
     public Long getId() {

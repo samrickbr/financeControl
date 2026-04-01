@@ -12,9 +12,13 @@ public record LancamentoResponseDTO(
 
         LocalDate dataVencimento,
 
+        LocalDate dataPagamento,
+
         String descricao,
 
         String categoria,
+
+        Long idUsuario,
 
         String nomeUsuario
 ) {
