@@ -22,6 +22,8 @@ Este projeto foi desenvolvido com foco em:
 * Java 17+
 * Spring Boot 3
 * Spring Data JPA
+* Spring Security
+* Auth0 JWT
 * PostgreSQL
 * Maven
 * Bean Validation (`@Valid`, `@NotNull`, etc.)
@@ -89,6 +91,43 @@ Sistema de rastreabilidade com:
 
 ---
 
+## 🔐 Segurança e Autenticação
+
+A API utiliza **Spring Security** com **JWT (JSON Web Token)** para controle de acesso. As senhas são criptografadas utilizando o algoritmo **BCrypt**.
+
+### Configuração
+O projeto utiliza uma chave secreta para geração e validação dos tokens. Em ambiente de desenvolvimento, certifique-se de que a variável de ambiente ou propriedade esteja configurada:
+- `api.security.token.secret`: Sua chave secreta (ex: ${JWT_SECRET:12345678})
+
+### Endpoints de Autenticação
+| Método | Endpoint | Descrição | Acesso |
+| :--- | :--- | :--- | :--- |
+| POST | `/login` | Autentica usuário e devolve o Token JWT | Público |
+| POST | `/usuarios` | Cadastro de novos usuários | Público |
+
+---
+
+## 🚀 Como Testar no Postman
+
+Para acessar as rotas protegidas (como listagem de lançamentos), você deve seguir estes passos:
+
+1. **Obter o Token:**
+    - Realize uma requisição `POST` para `/login` enviando `email` e `senha` no corpo (JSON).
+    - Copie o valor da chave `token` retornado no corpo da resposta.
+
+2. **Configurar a Autorização:**
+    - Na requisição que deseja testar (ex: `GET /lancamentos`), vá na aba **Auth**.
+    - No campo **Type**, selecione **Bearer Token**.
+    - Cole o token copiado no campo **Token**.
+
+3. **Verificação Manual (Headers):**
+    - Caso prefira configurar manualmente, vá na aba **Headers**.
+    - Adicione a chave `Authorization` com o valor `Bearer <seu_token_aqui>` (respeitando o espaço após a palavra Bearer).
+
+> **Nota:** Se o token estiver ausente, expirado ou for inválido, a API retornará um erro **403 Forbidden** ou **401 Unauthorized**.
+
+---
+
 ## 📡 Exemplos de Uso da API
 
 ### ➕ Criar usuário
@@ -97,8 +136,8 @@ Sistema de rastreabilidade com:
 
 ```json
 {
-  "nome": "Rick",
-  "email": "rick@email.com",
+  "nome": "Nome_usuario",
+  "email": "seu_email@email.com",
   "senha": "123456",
   "cpf": "12345678901",
   "profissao": "Desenvolvedor"
@@ -163,12 +202,21 @@ src/main/resources/application.properties
 Configure:
 
 ```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/finance_db
+
+# Conexão com o Banco
+spring.datasource.url=jdbc:postgresql://localhost:5433/finance_db
 spring.datasource.username=seu_usuario
 spring.datasource.password=sua_senha
 
+# Estratégia do Hibernate (Cria as tabelas automaticamente)
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
+
+#Chave de segurança do token de validação
+api.security.token.secret=${JWT_SECRET:frase-secreta-de-senha-forte-aqui-123}
+
 ```
 
 ---
@@ -185,7 +233,7 @@ mvn spring-boot:run
 
 * [x] Implementar Logs de Auditoria para todas as entidades críticas
 * [ ] Validação de CPF
-* [ ] Autenticação com Spring Security + JWT
+* [x] Autenticação com Spring Security + JWT
 * [ ] Relatórios financeiros por usuário (mensal/anual)
 * [ ] Soft Delete para usuários e lançamentos
 * [ ] Documentação com Swagger/OpenAPI
