@@ -1,7 +1,6 @@
 package samrick.financeControl.model;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.DialectOverride;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
@@ -23,6 +22,7 @@ public class Lancamento {
     private TipoLancamento tipo;
 
     private BigDecimal valor;
+    private LocalDate dataLancamento;
     private LocalDate dataVencimento;
     private LocalDate dataPagamento;
     private String descricao;
@@ -60,6 +60,14 @@ public class Lancamento {
 
     public void setValor(BigDecimal valor) {
         this.valor = valor;
+    }
+
+    public LocalDate getDataLancamento() {
+        return dataLancamento;
+    }
+
+    public void setDataLancamento(LocalDate dataLancamento) {
+        this.dataLancamento = dataLancamento;
     }
 
     public LocalDate getDataVencimento() {

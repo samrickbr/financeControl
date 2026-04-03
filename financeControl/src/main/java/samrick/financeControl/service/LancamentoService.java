@@ -8,6 +8,7 @@ import samrick.financeControl.audit.LogAuditoriaService;
 import samrick.financeControl.dto.LancamentoRequestDTO;
 import samrick.financeControl.dto.LancamentoResponseDTO;
 import samrick.financeControl.dto.LancamentoUpdateDTO;
+import samrick.financeControl.dto.RelatorioFinanceiroDTO;
 import samrick.financeControl.exceptions.RecursoNaoEncontradoException;
 import samrick.financeControl.exceptions.RegraNegocioException;
 import samrick.financeControl.mapper.LancamentoMapper;
@@ -16,6 +17,7 @@ import samrick.financeControl.model.Usuario;
 import samrick.financeControl.repository.LancamentoRepository;
 import samrick.financeControl.repository.UsuarioRepository;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -129,4 +131,7 @@ public class LancamentoService {
         );
         repository.delete(lancamento);
     }
+
+    /*------------------------------------------------------------------*/
+
 }

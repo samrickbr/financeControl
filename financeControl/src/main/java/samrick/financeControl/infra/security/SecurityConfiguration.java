@@ -36,6 +36,7 @@ public class SecurityConfiguration {
                     //Rotas de lançamentos (Acessível po admin, financeiro e comum
                     //Usamos hasAnyHole para permitir múltiplos perfis
                     req.requestMatchers("/lancamentos/**").hasAnyRole("ADMIN", "FINANCEIRO", "USER");
+                    req.requestMatchers("/relatorios/**").authenticated(); // Relatórios liberados para qualquer usuario autenticado
 
                     req.anyRequest().authenticated(); // bloqueia tudo o resto
                 })

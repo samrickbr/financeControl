@@ -15,6 +15,8 @@ public record LancamentoRequestDTO(
         TipoLancamento tipo,
         @Positive
         BigDecimal valor,
+        @NotNull
+        LocalDate dataLancamento,
         @NotNull(message = "A data de vencimento é obrigatória!")
         LocalDate dataVencimento,
 

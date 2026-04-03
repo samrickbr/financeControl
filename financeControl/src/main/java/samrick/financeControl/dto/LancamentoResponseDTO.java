@@ -8,6 +8,7 @@ public record LancamentoResponseDTO(
         Long id,
         String tipo,
         BigDecimal valor,
+        LocalDate dataLancamento,
         LocalDate dataVencimento,
         LocalDate dataPagamento,
         String descricao,

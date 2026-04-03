@@ -16,6 +16,7 @@ public class LancamentoMapper {
                 lancamento.getId(),
                 lancamento.getTipo().name(),
                 lancamento.getValor(),
+                lancamento.getDataLancamento(),
                 lancamento.getDataVencimento(),
                 lancamento.getDataPagamento(),
                 lancamento.getDescricao(),
@@ -31,6 +32,7 @@ public class LancamentoMapper {
         Lancamento lancamento = new Lancamento();
        lancamento.setTipo(dto.tipo());
         lancamento.setValor(dto.valor());
+        lancamento.setDataVencimento(dto.dataLancamento());
         lancamento.setDataVencimento(dto.dataVencimento());
         lancamento.setDataPagamento(dto.dataPagamento());
         lancamento.setDescricao(dto.descricao());
