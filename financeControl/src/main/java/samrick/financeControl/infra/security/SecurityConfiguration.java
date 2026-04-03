@@ -28,6 +28,7 @@ public class SecurityConfiguration {
                     // Rotas públicas - sem autenticação
                     req.requestMatchers(HttpMethod.POST, "/login").permitAll(); //libera o login
                     req.requestMatchers(HttpMethod.POST, "/usuarios").permitAll();  //libera o cadastro de usuarios
+                    req.requestMatchers( "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll();
 
                     // rotas de Administração (ex: deletar usuários
                     req.requestMatchers(HttpMethod.DELETE, "/usuarios/**").hasRole("ADMIN");
