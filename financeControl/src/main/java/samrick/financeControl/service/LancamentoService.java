@@ -53,7 +53,7 @@ public class LancamentoService {
     public List<LancamentoResponseDTO> listarTodos() {
         return repository.findAll()
                 .stream()
-                .map(mapper::toDTO)
+                .map(LancamentoResponseDTO::new)
                 .toList();
     }
 

@@ -1,6 +1,8 @@
 package samrick.financeControl.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 import org.springframework.security.core.GrantedAuthority;
@@ -11,6 +13,7 @@ import samrick.financeControl.dto.UsuarioRequestDTO;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 
 @Entity
 @Table(name = "usuarios")
@@ -35,6 +38,27 @@ public class Usuario implements UserDetails {
     private LocalDateTime dataUltimaAlteracao;
     private boolean ativo = true;
 
+    @Enumerated(EnumType.STRING)
+    private TipoVinculo tipoVinculo;
+
+    /*------------------------------------------------------------------------*/
+
+    @PrePersist
+    @PreUpdate
+    public void padronizarCampos() {
+        if (this.nome != null) {
+            this.nome = this.nome.toUpperCase();
+        }
+        if (this.email != null) {
+            this.email = this.email.toLowerCase().trim();
+        }
+        if (this.profissao != null) {
+            this.profissao = this.profissao.toUpperCase();
+        }
+    }
+
+    /*------------------------------------------------------------------------*/
+
     public Usuario() {
     }
 
@@ -44,6 +68,7 @@ public class Usuario implements UserDetails {
         this.cpf = dados.cpf();
         this.profissao = dados.profissao();
         this.senha = dados.senha();
+        this.tipoVinculo = dados.tipoVinculo();
     }
 
     public Long getId() {
@@ -125,6 +150,15 @@ public class Usuario implements UserDetails {
     public void setAtivo(boolean ativo) {
         this.ativo = ativo;
     }
+
+    public TipoVinculo getTipoVinculo() {
+        return tipoVinculo;
+    }
+
+    public void setTipoVinculo(TipoVinculo tipoVinculo) {
+        this.tipoVinculo = tipoVinculo;
+    }
+
     /*---------------------------------------------------------------------*/
 
     @Override

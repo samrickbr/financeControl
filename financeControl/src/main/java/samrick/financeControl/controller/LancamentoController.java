@@ -42,7 +42,8 @@ public class LancamentoController {
 
     @GetMapping
     public ResponseEntity<List<LancamentoResponseDTO>> listarTodos() {
-        return ResponseEntity.ok(service.listarTodos());
+        List<LancamentoResponseDTO> lista = service.listarTodos();
+        return ResponseEntity.ok(lista);
     }
 
     @GetMapping("/{id}")

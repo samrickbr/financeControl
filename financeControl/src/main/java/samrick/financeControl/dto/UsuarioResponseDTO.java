@@ -1,5 +1,7 @@
 package samrick.financeControl.dto;
 
+import samrick.financeControl.model.TipoVinculo;
+
 import java.time.LocalDateTime;
 
 public record UsuarioResponseDTO(
@@ -8,6 +10,7 @@ public record UsuarioResponseDTO(
         String email,
         String profissao,
         LocalDateTime dataUltimaAlteracao,
-        String usuarioUltimaAlteracao
+        String usuarioUltimaAlteracao,
+        TipoVinculo tipoVinculo
 )
 {}

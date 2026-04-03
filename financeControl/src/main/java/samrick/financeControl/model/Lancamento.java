@@ -35,6 +35,7 @@ public class Lancamento {
     @JoinColumn(name = "usuario_id")
     private Usuario usuario; // Isso liga o lançamento ao dono
 
+    /*-------------------------------------------------------------*/
     public Lancamento() {
     }
 
@@ -124,5 +125,16 @@ public class Lancamento {
 
     public void setDataUltimaAlteracao(LocalDateTime dataUltimaAlteracao) {
         this.dataUltimaAlteracao = dataUltimaAlteracao;
+    }
+
+    @PrePersist
+    @PreUpdate
+    public void padronizarCampos(){
+        if (this.categoria != null){
+            this.categoria = this.categoria.toUpperCase().trim();
+        }
+        if (this.descricao != null){
+            this.descricao = this.descricao.toUpperCase().trim();
+        }
     }
 }

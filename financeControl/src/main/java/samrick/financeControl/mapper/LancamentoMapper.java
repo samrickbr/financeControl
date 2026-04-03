@@ -12,27 +12,14 @@ import samrick.financeControl.model.Usuario;
 public class LancamentoMapper {
 
     public LancamentoResponseDTO toDTO(Lancamento lancamento) {
-        return new LancamentoResponseDTO(
-                lancamento.getId(),
-                lancamento.getTipo().name(),
-                lancamento.getValor(),
-                lancamento.getDataLancamento(),
-                lancamento.getDataVencimento(),
-                lancamento.getDataPagamento(),
-                lancamento.getDescricao(),
-                lancamento.getCategoria(),
-                lancamento.getUsuario().getId(),
-                lancamento.getUsuario().getNome(),
-                lancamento.getDataUltimaAlteracao(),
-                lancamento.getUsuarioUltimaAlteracao()
-        );
+        return new LancamentoResponseDTO(lancamento);
     }
 
     public Lancamento toEntity(LancamentoRequestDTO dto, Usuario usuario) {
         Lancamento lancamento = new Lancamento();
-       lancamento.setTipo(dto.tipo());
+        lancamento.setTipo(dto.tipo());
         lancamento.setValor(dto.valor());
-        lancamento.setDataVencimento(dto.dataLancamento());
+        lancamento.setDataLancamento(dto.dataLancamento());
         lancamento.setDataVencimento(dto.dataVencimento());
         lancamento.setDataPagamento(dto.dataPagamento());
         lancamento.setDescricao(dto.descricao());

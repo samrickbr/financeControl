@@ -12,17 +12,20 @@ import samrick.financeControl.exceptions.RegraNegocioException;
 
 @RestControllerAdvice
 public class TratadorDeErros {
+
     //Erro 404 - Quando não encontra algo no banco
     @ExceptionHandler(RecursoNaoEncontradoException.class)
     public ResponseEntity tratarErro404(){
         return ResponseEntity.notFound().build();
     }
+
     //Erro 400 - Falha de validação (@Valid)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity tratarErro400(MethodArgumentNotValidException ex){
         var erros = ex.getFieldErrors().stream().map(DadosErroValidacao::new).toList();
         return ResponseEntity.badRequest().body(erros);
     }
+
     //Erro 404 - Regras de negócio específicas (exceptions personalizadas)
     @ExceptionHandler({EmailJaCadastradoException.class, EntidadeEmUsoException.class, RegraNegocioException.class})
     public ResponseEntity tratarErroRegraDeNegocio(RuntimeException ex){

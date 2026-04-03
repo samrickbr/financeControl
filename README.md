@@ -20,7 +20,7 @@ Este projeto foi desenvolvido com foco em:
 ## 🛠️ Tecnologias Utilizadas
 
 * Java 17+
-* Spring Boot 3
+* Spring Boot 3.4.2
 * Spring Data JPA
 * Spring Security
 * Auth0 JWT
@@ -31,6 +31,7 @@ Este projeto foi desenvolvido com foco em:
 * Jackson (serialização/desserialização JSON)
 * Lombok
 * Postman (testes de API)
+* SpringDoc OpenAPI 2.8.5
 
 ---
 
@@ -39,36 +40,52 @@ Este projeto foi desenvolvido com foco em:
 O projeto segue o padrão de **arquitetura em camadas**, com separação clara de responsabilidades:
 
 ```text
-src/main/java/com/samrick/financecontrol/
-├── audit/        # Rastreabilidade e log de alterações
-├── controller/   # Endpoints REST
-├── dto/          # Request e Response (Records)
-├── mapper/       # Conversão entre Entidades e DTOs
-├── service/      # Regras de negócio
-├── repository/   # Acesso ao banco de dados
-├── model/        # Entidades JPA
-├── infra/        # Tratamento global de exceções
-├── exceptions/   # Classes de erro padronizadas
-└── config/       # Configurações da aplicação
+src/main/java/samrick/financeControl/
+├── audit/                      # Rastreabilidade e log de alterações
+├── config/                     # Configurações da aplicação (Swagger, etc.)
+├── controller/                 # Endpoints REST
+├── dto/                        # Request/Response utilizando Java Records
+├── exceptions/                 # Definição de exceções personalizadas
+├── infra/                      # Infraestrutura técnica do sistema
+│   ├── security/               # Configurações de JWT e Filtros de Segurança
+│   ├── utils/                  # Utilitários e Validadores (ex: @Cpf)
+│   └── RestExceptionHandler    # Tratamento global de erros
+├── mapper/                     # Conversão entre Entidades e DTOs (MapStruct/Manual)
+├── model/                      # Entidades JPA (Mapeamento do Banco de Dados)
+├── repository/                 # Interfaces de acesso ao banco (Spring Data JPA)
+└── service/                    # Regras de negócio e lógica da aplicação
 ```
+
+* ✅ Uso de DTO para evitar exposição de entidades
+* ✅ Validações no Service para garantir regras de negócio
+* ✅ Uso de Exception Handler para padronização de erros
 
 ---
 
 ## 🔥 Funcionalidades Implementadas
 
-### 👤 Usuários
+### 👤 Usuários e Segurança
 
-* Cadastro com validação de e-mail único
-* Criptografia de senha com BCrypt
+* ✅ **Cadastro Seguro:** Validação de e-mail único e criptografia de senhas com BCrypt.
+* ✅ **Integridade de Dados:** Validação de CPF via Annotation customizada e tratamento global de exceções.
+* ✅ **Autenticação JWT:** Proteção de rotas com Stateless Authentication via Bearer Token.
+* ✅ **RBAC (Role-Based Access Control):** Controle de acesso granular por perfis (ADMIN e USER).
 
----
+## 💸 Gestão Financeira e Relatórios
 
-### 💸 Lançamentos Financeiros
+* ✅ **Lançamentos:** Cadastro de receitas/despesas com conversão segura de ENUMs e associação automática ao usuário logado.
+* ✅ **Resumo Anual Completo:** Endpoint de alta performance que entrega entradas, saídas e saldo mensal, além do fechamento anual.
+* ✅ **Auditoria:** Rastreabilidade total com logs de alteração e Soft Delete para preservação de histórico.
 
-* Cadastro de receitas e despesas
-* Associação com usuário
-* Validação de dados obrigatórios
-* Conversão segura de tipos (ENUM)
+## 🛠️ Facilidades para o Desenvolvedor
+
+* ✅ **Swagger UI:** Documentação interativa para teste imediato de todos os endpoints.
+
+## 🛠️ Como Testar (Swagger)
+1. Inicie a aplicação.
+2. Acesse `http://localhost:8080/swagger-ui/index.html`.
+3. Utilize o endpoint `/login` para gerar um token.
+4. Clique no botão **Authorize** e cole o token para liberar as rotas protegidas.
 
 ---
 
@@ -88,6 +105,13 @@ src/main/java/com/samrick/financecontrol/
 
 ---
 
+### 📊 Inteligência de Dados
+
+* ***Resumo Anual Consolidado:*** Endpoint que processa e agrupa lançamentos por mês diretamente via JPQL.
+* ***Cálculo Automático de Saldo:*** O sistema entrega o total de entradas, saídas e o saldo mensal, além do fechamento anual acumulado, otimizando a performance para o Front-end.
+
+---
+
 ### ⚠️ Tratamento de Erros
 
 * Uso de `@RestControllerAdvice`
@@ -98,25 +122,43 @@ src/main/java/com/samrick/financecontrol/
 
 ## 🔐 Segurança e Autenticação
 
-A API utiliza **Spring Security** com **JWT (JSON Web Token)** para controle de acesso. As senhas são criptografadas utilizando o algoritmo **BCrypt**.
+A API utiliza ***Spring Security*** com ***JWT (JSON Web Token)*** para controle de acesso. As senhas são criptografadas utilizando o algoritmo **BCrypt**.
+
+* ***Padrão DTO (Data Transfer Objects):*** Blindagem total das entidades. Dados sensíveis como senhas e estruturas internas do banco nunca são expostos no JSON.
+* ***Validação de CPF Customizada:*** Implementação de Annotation `@Cpf` e classe de utilitário em `infra/utils` para garantir a integridade dos documentos antes de chegarem ao banco.
 
 ### Configuração
 O projeto utiliza uma chave secreta para geração e validação dos tokens. Em ambiente de desenvolvimento, certifique-se de que a variável de ambiente ou propriedade esteja configurada:
 - `api.security.token.secret`: Sua chave secreta (ex: ${JWT_SECRET:12345678})
 
-### Endpoints de Autenticação
-| Método | Endpoint    | Descrição                               | Acesso  |
-| :--- |:------------|:----------------------------------------|:--------|
-| POST | `/login`    | Autentica usuário e devolve o Token JWT | Público |
-| POST | `/usuarios` | Cadastro de novos usuários              | Público |
+### Endpoints da API
 
-### Endpoints Gerais
-| Método | Endpoint            | Descrição                                         | Acesso     |
-|:-------|:--------------------|:--------------------------------------------------|:-----------|
-| GET    | `/lancamentos`      | Lista lançamentos(Dono vê os seus, Admin vê todos | User/Admin |
-| POST   | `/lancamentos`      | Cria novo lançamento vinculado ao token           | User/Admin |
-| PUT    | `/lancamentos/{id}` | Atualiza com justificativa(Dono ou Admin)         | User/Admin |
-| DELETE | `/usuarios/{id}`    | Exclusão de usuários (Admin)                      | Admin      |
+## 🔐 Autenticação e Usuários
+
+| Método | Endpoint         | Descrição                                | Acesso  |
+|:-------|:-----------------|:-----------------------------------------|:--------|
+| POST   | `/login`         | Autentica usuário e devolve o Token JWT  | Público |
+| POST   | `/usuarios`      | Cadastro de novos usuários               | Público |
+| DELETE | `/usuarios/{id}` | Exclusão lógica(Soft Delete) de usuários | Admin   |
+
+
+## 💸 Lançamentos Financeiros
+
+| Método | Endpoint                       | Descrição                                                  | Acesso     |
+|:-------|:-------------------------------|:-----------------------------------------------------------|:-----------|
+| GET    | `/lancamentos`                 | Lista lançamentos(Dono vê os seus, Admin vê todos          | User/Admin |
+| POST   | `/lancamentos`                 | Cria novo lançamento vinculado ao token                    | User/Admin |
+| PUT    | `/lancamentos/{id}`            | Atualiza com justificativa(Dono ou Admin)                  | User/Admin |
+| GET    | `/lancamentos/busca-categoria` | Filtra lançamentos por nome de categoria(Case Insensitive) | User/Admin |
+
+## 📊 Relatórios e Inteligência
+
+| Método | Endpoint                         | Descrição                                                    | Acesso     |
+|:-------|:---------------------------------|:-------------------------------------------------------------|:-----------|
+| GET    | `/relatorios/financeiro`         | Resumo rápido: Total, Entradas, Saídas e Saldo Anual         | User/Admin |
+| GET    | `/relatorios/resumo-anual`       | Relatório detalhado: Evolução mensal e Saldo Final do ano    | User/Admin |
+| GET    | `/relatorios/categoria`          | Distribuição de gastos agrupados por categoria               | User/Admin |
+
 ---
 
 ## 🚀 Como Testar no Postman
@@ -144,7 +186,7 @@ Para acessar as rotas protegidas (como listagem de lançamentos), você deve seg
 
 ### ➕ Criar usuário
 
-**POST /usuarios**
+**POST `/usuarios`**
 
 ```json
 {
@@ -160,23 +202,55 @@ Para acessar as rotas protegidas (como listagem de lançamentos), você deve seg
 
 ### 💸 Criar lançamento
 
-**POST /lancamentos**
+**POST `/lancamentos`**
 
 ```json
 {
-  "tipo": "RECEITA",
-  "valor": 150.00,
-  "dataVencimento": "2026-04-10",
-  "descricao": "Serviço realizado",
-  "categoria": "Oficina"
+   "tipo": "RECEITA",
+   "valor": 150,
+   "dataLancamento": "2026-04-03",
+   "dataVencimento": "2026-05-03",
+   "dataPagamento": "2026-04-30",
+   "descricao": "Serviço realizado",
+   "categoria": "Oficina"
 }
 ```
 
+**Retorno**
+
+```json
+{
+  "id": 8,
+  "tipo": "RECEITA",
+  "valor": 150,
+  "dataLancamento": "2026-04-03",
+  "dataVencimento": "2026-05-03",
+  "dataPagamento": "2026-04-30",
+  "descricao": "SERVIÇO REALIZADO",
+  "categoria": "OFICINA",
+  "nomeUsuario": "Administrador",
+  "dataUltimaAlteracao": null,
+  "usuarioUltimaAlteracao": null
+}
+```
+
+**Exemplo de erro 400 - Dados incompletos
+```json
+[
+  {
+    "timestamp": "03/04/2026 18:04:00",
+    "status": 400,
+    "error": "Erro de Validação: categoria",
+    "message": "O campo deve ter no mínimo 5 caracteres",
+    "path": ""
+  }
+]
+```
 ---
 
 ### ✏️ Atualizar lançamento (com auditoria)
 
-**PUT /lancamentos/{id}**
+**PUT `/lancamentos/{id}`**
 
 ```json
 {
@@ -189,10 +263,65 @@ Para acessar as rotas protegidas (como listagem de lançamentos), você deve seg
   "justificativa": "Atualização de valor conforme tabela 2026"
 }
 ```
+### 📡 Exemplo de Resumo Anual
+**GET `/relatorios/resumo-anual?ano=2026`**
+```json
+{
+   "meses": [
+      { "mes": 4, "entradas": 1780.00, "saidas": 730.80, "saldoMensal": 1049.20 }
+   ],
+   "totalEntradasAno": 1780.00,
+   "totalSaidasAno": 730.80,
+   "saldoFinalAno": 1049.20
+}
+```
+## Retorno do Endpoint
+
+```json
+{
+  "meses": [
+    {
+      "mes": 3,
+      "entradas": 0,
+      "saidas": 1680,
+      "saldoMensal": -1680
+    },
+    {
+      "mes": 4,
+      "entradas": 1780,
+      "saidas": 730.8,
+      "saldoMensal": 1049.2
+    }
+  ],
+  "totalEntradasAno": 1780,
+  "totalSaidasAno": 2410.8,
+  "saldoFinalAno": -630.8
+}
+```
+
+## 💡 Notas de Implementação
+
+* Filtragem de Dados: Todos os endpoints de listagem e relatórios aplicam automaticamente o filtro pelo ID do usuário extraído do Token JWT.
+* Proteção de Dados: Os retornos utilizam `LancamentoResponseDTO` e `RelatorioAnualCompletoDTO`, garantindo que informações sensíveis não sejam expostas.
+* Validação Automática: O endpoint de cadastro de usuários valida o formato e a veracidade do CPF antes de processar a requisição.
 
 ---
 
 ## ▶️ Como Executar o Projeto
+
+## 📋 Pré-requisitos
+
+***Antes de começar, você vai precisar ter instalado em sua máquina as seguintes ferramentas:***
+
+* **Java JDK 17:** Versão mínima necessária para suporte a Records e padrões de projeto modernos.
+
+* **Maven 3.9+:** Gerenciador de dependências e build do projeto.
+
+* **PostgreSQL 15+:** Banco de dados relacional (Certifique-se de que o serviço está rodando na porta 5432 ou 5433 conforme seu .properties).
+
+* **IDE de sua preferência:** Recomendado IntelliJ IDEA ou VS Code com extensões Java.
+
+* **Postman ou Insomnia:** Para realizar os testes nos endpoints da API.
 
 ### 1. Clonar o repositório
 
@@ -254,20 +383,23 @@ Para facilitar o teste e a avaliação do projeto, implementamos um Database See
 
 ## 📈 Próximas Melhorias
 
-* [x] Implementar Logs de Auditoria para todas as entidades críticas
-* [ ] Validação de CPF
-* [x] Autenticação com Spring Security + JWT
-* [x] Controle de acesso por Perfis(ADMIN, USER)
-* [ ] Relatórios financeiros por usuário (mensal/anual)
-* [x] Soft Delete para usuários e lançamentos
-* [ ] Documentação com Swagger/OpenAPI
+* ✅ Implementar Logs de Auditoria para todas as entidades críticas
+* ✅ Validação de CPF
+* ✅ Autenticação com Spring Security + JWT
+* ✅ Controle de acesso por Perfis(ADMIN, USER)
+* ✅ Relatórios financeiros por usuário (mensal/anual com saldo acomulado)
+* ✅ Soft Delete para usuários e lançamentos
+* ✅ Documentação com Swagger/OpenAPI
+* [ ] Implementação de Agentes de IA para análise preditiva de gastos (LangChain/Spring AI)
+* [ ] Dashboard Front-end para visualização dos gráficos anuais
 
 ---
 
 ## 👨‍💻 Autor
 
 **Rick (Ricardo)**
-Desenvolvedor Backend Java / Spring Boot
+
+Desenvolvedor Backend Java Focado em APIs REST com Spring Boot
 
 🔗 GitHub: https://github.com/samrickbr
 

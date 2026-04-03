@@ -37,26 +37,20 @@ public class UsuarioService {
     LancamentoRepository lancamentoRepository;
 
     public UsuarioResponseDTO salvar(@Valid UsuarioRequestDTO dados, Usuario usuarioLogado) {
-
         // 1- Validação de email duplicado
         if (repository.existsByEmail(dados.email())) {
             throw new EmailJaCadastradoException();
         }
-
         // 2. DEFINIÇÃO DO RESPONSÁVEL (Para a auditoria)
         String responsavel = (usuarioLogado != null) ? usuarioLogado.getNome() : "Auto-cadastro";
-
         // 3. MAPEAMENTO E PREPARAÇÃO
         Usuario novoUsuario = mapper.toEntity(dados, usuarioLogado);
         novoUsuario.setSenha(passwordEncoder.encode(dados.senha()));
-
         // Segurança: T odo cadastro novo é COMUM, a menos que um ADMIN mude depois
         novoUsuario.setPerfil(Perfilusuario.COMUM);
         novoUsuario.setAtivo(true);
-
         // 4. PERSISTÊNCIA
         Usuario salvo = repository.save(novoUsuario);
-
         // 5. AUDITORIA (Usando o 'responsavel' que definimos no passo 2)
         logService.registrarLog(
                 "USUARIO",
@@ -97,16 +91,13 @@ public class UsuarioService {
     public UsuarioResponseDTO atualizar(Long id, UsuarioUpdateDTO dados, Usuario usuarioLogado) {
         Usuario usuarioAntigo = repository.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário", id));
-
         //Validação de segurança:
         boolean ehDono = usuarioAntigo.getId().equals(usuarioLogado.getId());
         boolean ehAdmin = usuarioLogado.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-
         if (!ehDono && !ehAdmin) {
             throw new RegraNegocioException("Você não tem permissão para alterar este lançamento!");
         }
-
         logService.registrarLog(
                 "USUARIO",
                 id,
@@ -115,20 +106,15 @@ public class UsuarioService {
                 dados.justificativa(),
                 usuarioLogado.getNome()
         );
-
         usuarioAntigo.setNome(dados.nome());
         usuarioAntigo.setEmail(dados.email());
-
         if (dados.senha() != null && !dados.senha().isBlank()) {
             usuarioAntigo.setSenha(passwordEncoder.encode(dados.senha()));
         }
-
         usuarioAntigo.setCpf(dados.cpf());
         usuarioAntigo.setProfissao(dados.profissao());
-
         usuarioAntigo.setDataUltimaAlteracao(LocalDateTime.now());
         usuarioAntigo.setUsuarioUltimaAlteracao(usuarioAntigo.getNome());
-
         return mapper.toDTO(repository.save(usuarioAntigo));
     }
 
@@ -145,7 +131,6 @@ public class UsuarioService {
         boolean ehDono = usuario.getId().equals(usuarioLogado.getId());
         boolean ehAdmin = usuarioLogado.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-
         if (!ehDono && !ehAdmin) {
             throw new RegraNegocioException("Você não tem permissão para excluir este lançamento!");
         }
