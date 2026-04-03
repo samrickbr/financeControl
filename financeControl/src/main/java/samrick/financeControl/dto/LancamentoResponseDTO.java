@@ -2,24 +2,19 @@ package samrick.financeControl.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public record LancamentoResponseDTO(
         Long id,
-
         String tipo,
-
         BigDecimal valor,
-
         LocalDate dataVencimento,
-
         LocalDate dataPagamento,
-
         String descricao,
-
         String categoria,
-
         Long idUsuario,
-
-        String nomeUsuario
+        String nomeUsuario,
+        LocalDateTime dataUltimaAlteracao,
+        String usuarioUltimaAlteracao
 ) {
 }

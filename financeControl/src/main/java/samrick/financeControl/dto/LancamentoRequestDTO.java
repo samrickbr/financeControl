@@ -1,6 +1,9 @@
 package samrick.financeControl.dto;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import samrick.financeControl.model.TipoLancamento;
 
 import java.math.BigDecimal;
@@ -12,7 +15,7 @@ public record LancamentoRequestDTO(
         TipoLancamento tipo,
         @Positive
         BigDecimal valor,
-        @NotNull
+        @NotNull(message = "A data de vencimento é obrigatória!")
         LocalDate dataVencimento,
 
         LocalDate dataPagamento,
@@ -20,8 +23,6 @@ public record LancamentoRequestDTO(
         @NotBlank @Size(min = 5, message = "O campo deve ter no mínimo 5 caracteres")
         String descricao,
         @NotNull @Size(min = 5, message = "O campo deve ter no mínimo 5 caracteres")
-        String categoria,
-        @NotNull
-        Long usuarioID
+        String categoria
 ) {
 }

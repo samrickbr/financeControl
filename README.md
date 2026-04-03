@@ -40,6 +40,7 @@ O projeto segue o padrão de **arquitetura em camadas**, com separação clara d
 
 ```text
 src/main/java/com/samrick/financecontrol/
+├── audit/        # Rastreabilidade e log de alterações
 ├── controller/   # Endpoints REST
 ├── dto/          # Request e Response (Records)
 ├── mapper/       # Conversão entre Entidades e DTOs
@@ -78,6 +79,8 @@ Sistema de rastreabilidade com:
 * Registro de ações: **CADASTRAR, ALTERAR, EXCLUIR**
 * Armazenamento do estado anterior (JSON)
 * Justificativa obrigatória para alterações
+* Validação de Propriedade: O sistema impede que um usuário altere lançamentos de terceiros, garantindo a privacidade dos dados.
+* Hierarquia de Acesso: Administradores possuem permissão para gerenciar e auditar registros de qualquer usuário.
 
 💡 Ideal para cenários que exigem controle e histórico de mudanças
 
@@ -100,11 +103,18 @@ O projeto utiliza uma chave secreta para geração e validação dos tokens. Em 
 - `api.security.token.secret`: Sua chave secreta (ex: ${JWT_SECRET:12345678})
 
 ### Endpoints de Autenticação
-| Método | Endpoint | Descrição | Acesso |
-| :--- | :--- | :--- | :--- |
-| POST | `/login` | Autentica usuário e devolve o Token JWT | Público |
-| POST | `/usuarios` | Cadastro de novos usuários | Público |
+| Método | Endpoint    | Descrição                               | Acesso  |
+| :--- |:------------|:----------------------------------------|:--------|
+| POST | `/login`    | Autentica usuário e devolve o Token JWT | Público |
+| POST | `/usuarios` | Cadastro de novos usuários              | Público |
 
+### Endpoints Gerais
+| Método | Endpoint            | Descrição                                         | Acesso     |
+|:-------|:--------------------|:--------------------------------------------------|:-----------|
+| GET    | `/lancamentos`      | Lista lançamentos(Dono vê os seus, Admin vê todos | User/Admin |
+| POST   | `/lancamentos`      | Cria novo lançamento vinculado ao token           | User/Admin |
+| PUT    | `/lancamentos/{id}` | Atualiza com justificativa(Dono ou Admin)         | User/Admin |
+| DELETE | `/usuarios/{id}`    | Exclusão de usuários (Admin)                      | Admin      |
 ---
 
 ## 🚀 Como Testar no Postman
@@ -156,8 +166,7 @@ Para acessar as rotas protegidas (como listagem de lançamentos), você deve seg
   "valor": 150.00,
   "dataVencimento": "2026-04-10",
   "descricao": "Serviço realizado",
-  "categoria": "Oficina",
-  "usuarioId": 1
+  "categoria": "Oficina"
 }
 ```
 
@@ -169,12 +178,12 @@ Para acessar as rotas protegidas (como listagem de lançamentos), você deve seg
 
 ```json
 {
-  "descricao": "Troca de óleo - Revisão",
-  "valor": 180.00,
+   "tipo": "DESPESA",
+  "valor": 180.00, 
   "dataVencimento": "2026-04-05",
+  "dataPagamento": "2026-04-05",
+  "descricao": "Troca de óleo - Revisão",
   "categoria": "Oficina",
-  "tipo": "RECEITA",
-  "usuarioId": 1,
   "justificativa": "Atualização de valor conforme tabela 2026"
 }
 ```
@@ -234,6 +243,7 @@ mvn spring-boot:run
 * [x] Implementar Logs de Auditoria para todas as entidades críticas
 * [ ] Validação de CPF
 * [x] Autenticação com Spring Security + JWT
+* [x] Controle de acesso por Perfis(ADMIN, USER)
 * [ ] Relatórios financeiros por usuário (mensal/anual)
 * [ ] Soft Delete para usuários e lançamentos
 * [ ] Documentação com Swagger/OpenAPI

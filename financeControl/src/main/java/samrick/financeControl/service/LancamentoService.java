@@ -12,11 +12,11 @@ import samrick.financeControl.exceptions.RecursoNaoEncontradoException;
 import samrick.financeControl.exceptions.RegraNegocioException;
 import samrick.financeControl.mapper.LancamentoMapper;
 import samrick.financeControl.model.Lancamento;
-import samrick.financeControl.model.TipoLancamento;
 import samrick.financeControl.model.Usuario;
 import samrick.financeControl.repository.LancamentoRepository;
 import samrick.financeControl.repository.UsuarioRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -30,11 +30,11 @@ public class LancamentoService {
     @Autowired
     private LogAuditoriaService logService;
 
-    public LancamentoResponseDTO salvar(@Valid LancamentoRequestDTO dados) {
-        Usuario usuario = usuarioRepository.findById(dados.usuarioID())
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário", dados.usuarioID()));
-        Lancamento novo = mapper.toEntity(dados, usuario);
-        novo.setUsuario(usuario);
+    @Transactional
+    public LancamentoResponseDTO salvar(@Valid LancamentoRequestDTO dados, Usuario usuarioLogado) {
+        Lancamento novo = mapper.toEntity(dados, usuarioLogado);
+        novo.setUsuario(usuarioLogado);
+
         Lancamento salvo = repository.save(novo);
 
         logService.registrarLog(
@@ -42,8 +42,8 @@ public class LancamentoService {
                 salvo.getId(),
                 "CADASTRAR",
                 null,
-                "Novo lançamento registrado no sistema",
-                "Rick Admin"
+                "Novo lançamento de " + salvo.getTipo() + " registrado no sistema",
+                usuarioLogado.getNome()
         );
         return mapper.toDTO(salvo);
     }
@@ -67,59 +67,64 @@ public class LancamentoService {
     }
 
     @Transactional
-    public LancamentoResponseDTO atualizar(Long id, @Valid LancamentoUpdateDTO dto) {
+    public LancamentoResponseDTO atualizar(Long id, @Valid LancamentoUpdateDTO dto,
+                                           Usuario usuarioLogado) {
+        //Buscar o Lançamento original
         Lancamento lancamento = repository.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Lançamento", id));
 
+        //Validação de segurança:
+        boolean ehDono = lancamento.getUsuario().getId().equals(usuarioLogado.getId());
+        boolean ehAdmin = usuarioLogado.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (!ehDono && !ehAdmin) {
+            throw new RegraNegocioException("Você não tem permissão para alterar este lançamento!");
+        }
+        //Auditoria
         logService.registrarLog(
-                "USUARIO",
+                "LANCAMENTO",
                 id,
                 "ALTERAR",
                 lancamento,
                 dto.justificativa(),
-                "Sistema (RICK)"
+                usuarioLogado.getNome()
         );
+
         //atualizar os dados:
         lancamento.setValor(dto.valor());
         lancamento.setDescricao(dto.descricao());
         lancamento.setDataVencimento(dto.dataVencimento());
+        lancamento.setDataPagamento(dto.dataPagamento());
         lancamento.setCategoria(dto.categoria());
+        lancamento.setTipo(dto.tipo());
+        lancamento.setUsuarioUltimaAlteracao((usuarioLogado.getNome()));
+        lancamento.setDataUltimaAlteracao(LocalDateTime.now());
 
-        try {
-
-            lancamento.setTipo(TipoLancamento.valueOf(dto.tipo().toUpperCase()));
-        } catch (IllegalArgumentException | NullPointerException e) {
-            throw new RuntimeException("Tipo de lançamento inválido! Opções permitidas: "
-                    + TipoLancamento.listarOpcoes());
-        }
-
-        // realizar a busca do usuário para retornar o nome de quem está salvando no Json
-        Usuario usuarioCompleto = usuarioRepository.findById(dto.usuarioID()).orElseThrow(() ->
-                new RuntimeException("Usuário não encontrado"));
-
-        // Vincular o usário completo ao lançamento
-        lancamento.setUsuario(usuarioCompleto);
-
-
-        //Lançamento precisa ter data de vencimento
-        if (lancamento.getDataVencimento() == null) {
-            throw new RuntimeException("Data de vencimento é obrigatória!");
-        }
         //salvar o lancamento com todos os dados vinculados
         return mapper.toDTO(repository.save(lancamento));
     }
 
     @Transactional
-    public void excluir(Long id, String justificativa) {
+    public void excluir(Long id, String justificativa, Usuario usuarioLogado) {
         Lancamento lancamento = repository.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Lançamento", id));
+
+        boolean ehDono = lancamento.getUsuario().getId().equals(usuarioLogado.getId());
+        boolean ehAdmin = usuarioLogado.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (!ehDono && !ehAdmin) {
+            throw new RegraNegocioException("Você não tem permissão para alterar este lançamento!");
+        }
+
         logService.registrarLog(
-                "USUÁRIO",
+                "LANCAMENTO",
                 id,
                 "EXCLUIR",
                 lancamento,
                 justificativa,
-                "Rick Admin"
+                usuarioLogado.getNome()
         );
         repository.delete(lancamento);
     }

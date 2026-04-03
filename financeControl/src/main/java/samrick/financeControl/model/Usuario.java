@@ -24,6 +24,9 @@ public class Usuario implements UserDetails {
     private String cpf;
     private String profissao;
 
+    @Enumerated(EnumType.STRING)
+    private Perfilusuario perfil;
+
     public Usuario() {
     }
 
@@ -97,6 +100,9 @@ public class Usuario implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
+        if (this.perfil == Perfilusuario.ADMIN) {
+            return List.of(new SimpleGrantedAuthority("ROLE_ADMIN"), new SimpleGrantedAuthority("ROLE_USER"));
+        }
         return List.of(new SimpleGrantedAuthority("ROLE_USER"));
     }
 

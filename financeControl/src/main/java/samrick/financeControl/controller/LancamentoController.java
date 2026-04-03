@@ -2,14 +2,16 @@ package samrick.financeControl.controller;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import samrick.financeControl.dto.ExclusaoRequestDTO;
 import samrick.financeControl.dto.LancamentoRequestDTO;
 import samrick.financeControl.dto.LancamentoResponseDTO;
 import samrick.financeControl.dto.LancamentoUpdateDTO;
 import samrick.financeControl.model.Lancamento;
+import samrick.financeControl.model.Usuario;
 import samrick.financeControl.service.LancamentoService;
 
 import java.util.HashMap;
@@ -21,28 +23,41 @@ import java.util.Map;
 public class LancamentoController {
     @Autowired
     private LancamentoService service;
-    @PostMapping
-    public ResponseEntity<LancamentoResponseDTO> salvarLancamentos(@Valid @RequestBody LancamentoRequestDTO dados) {
-        LancamentoResponseDTO response = service.salvar(dados);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    @PostMapping
+    public ResponseEntity<LancamentoResponseDTO> salvarLancamentos(
+            @Valid @RequestBody LancamentoRequestDTO dados,
+            @AuthenticationPrincipal Usuario usuarioLogado) {
+
+        LancamentoResponseDTO response = service.salvar(dados, usuarioLogado);
+
+        // Retornar 201 Created com a URI do novo recurso
+        var uri = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(response.id())
+                .toUri();
+
+        return ResponseEntity.created(uri).body(response);
     }
+
     @GetMapping
-    public ResponseEntity<List<LancamentoResponseDTO>> listarTodos(){
+    public ResponseEntity<List<LancamentoResponseDTO>> listarTodos() {
         return ResponseEntity.ok(service.listarTodos());
     }
+
     @GetMapping("/{id}")
     public ResponseEntity<Lancamento> buscarLancamento(@PathVariable Long id) {
         Lancamento lancamentoEncontrado = service.buscarPorId(id);
         return ResponseEntity.ok(lancamentoEncontrado);
     }
+
     @GetMapping("/usuario/{usuarioId}")
     public ResponseEntity<Map<String, Object>> listarPorUsuario(@PathVariable Long usuarioId) {
-        List<LancamentoResponseDTO> lancamentos =service.listarPorUsuario(usuarioId);
+        List<LancamentoResponseDTO> lancamentos = service.listarPorUsuario(usuarioId);
 
         Map<String, Object> resposta = new HashMap<>();
 
-        if (lancamentos.isEmpty()){
+        if (lancamentos.isEmpty()) {
             resposta.put("mensagem", "Este usuário ainda não possui nenhum lançamento cadastrado!");
         } else {
             resposta.put("mensagem", "Lançamentos encontrados com sucesso!");
@@ -54,8 +69,10 @@ public class LancamentoController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Map<String, Object>> atualizar(@PathVariable Long id, @RequestBody @Valid LancamentoUpdateDTO dto){
-        LancamentoResponseDTO atualizado = service.atualizar(id, dto);
+    public ResponseEntity<Map<String, Object>> atualizar(@PathVariable Long id,
+                                                         @RequestBody @Valid LancamentoUpdateDTO dto,
+                                                         @AuthenticationPrincipal Usuario usuarioLogado) {
+        LancamentoResponseDTO atualizado = service.atualizar(id, dto, usuarioLogado);
 
         Map<String, Object> resposta = new HashMap<>();
         resposta.put("mesnagem", "Lançamento ID " + id + " atualizado com sucesso!");
@@ -65,8 +82,10 @@ public class LancamentoController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Map<String, Object>> excluir(@PathVariable Long id, @Valid @RequestBody ExclusaoRequestDTO request){
-        service.excluir(id, request.justificativa());
+    public ResponseEntity<Map<String, Object>> excluir(@PathVariable Long id,
+                                                       @Valid @RequestBody ExclusaoRequestDTO request,
+                                                       @AuthenticationPrincipal Usuario usuarioLogado) {
+        service.excluir(id, request.justificativa(), usuarioLogado);
 
         Map<String, Object> resposta = new HashMap<>();
         resposta.put("messagem", "Lançamento ID " + id + " excluído com sucesso!");

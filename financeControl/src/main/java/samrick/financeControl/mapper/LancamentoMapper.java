@@ -21,7 +21,9 @@ public class LancamentoMapper {
                 lancamento.getDescricao(),
                 lancamento.getCategoria(),
                 lancamento.getUsuario().getId(),
-                lancamento.getUsuario().getNome()
+                lancamento.getUsuario().getNome(),
+                lancamento.getDataUltimaAlteracao(),
+                lancamento.getUsuarioUltimaAlteracao()
         );
     }
 

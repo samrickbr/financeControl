@@ -25,8 +25,17 @@ public class SecurityConfiguration {
         return http.csrf(csrf -> csrf.disable()) //desativa a proteção contra csrf, tokens JWT já protegem contra isso em api stateless
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // a api não criará sessões no servidor
                 .authorizeHttpRequests(req -> {
+                    // Rotas públicas - sem autenticação
                     req.requestMatchers(HttpMethod.POST, "/login").permitAll(); //libera o login
                     req.requestMatchers(HttpMethod.POST, "/usuarios").permitAll();  //libera o cadastro de usuarios
+
+                    // rotas de Administração (ex: deletar usuários
+                    req.requestMatchers(HttpMethod.DELETE, "/usuarios/**").hasRole("ADMIN");
+
+                    //Rotas de lançamentos (Acessível po admin, financeiro e comum
+                    //Usamos hasAnyHole para permitir múltiplos perfis
+                    req.requestMatchers("/lancamentos/**").hasAnyRole("ADMIN", "FINANCEIRO", "USER");
+
                     req.anyRequest().authenticated(); // bloqueia tudo o resto
                 })
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)

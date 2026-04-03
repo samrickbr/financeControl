@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "lancamentos")
@@ -21,6 +22,8 @@ public class Lancamento {
     private LocalDate dataPagamento;
     private String descricao;
     private String categoria;
+    private String usuarioUltimaAlteracao;
+    private LocalDateTime dataUltimaAlteracao;
 
     @ManyToOne
     @JoinColumn(name = "usuario_id")
@@ -91,5 +94,21 @@ public class Lancamento {
 
     public void setUsuario(Usuario usuario) {
         this.usuario = usuario;
+    }
+
+    public String getUsuarioUltimaAlteracao() {
+        return usuarioUltimaAlteracao;
+    }
+
+    public void setUsuarioUltimaAlteracao(String usuarioUltimaAlteracao) {
+        this.usuarioUltimaAlteracao = usuarioUltimaAlteracao;
+    }
+
+    public LocalDateTime getDataUltimaAlteracao() {
+        return dataUltimaAlteracao;
+    }
+
+    public void setDataUltimaAlteracao(LocalDateTime dataUltimaAlteracao) {
+        this.dataUltimaAlteracao = dataUltimaAlteracao;
     }
 }
