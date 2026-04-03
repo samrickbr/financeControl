@@ -1,6 +1,9 @@
 package samrick.financeControl.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.DialectOverride;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -8,6 +11,8 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "lancamentos")
+@SQLDelete(sql = "update LANCAMENTOS SET ativo = false WHERE id = ?")
+@Where(clause = "ativo = true")
 public class Lancamento {
 
     @Id
@@ -24,6 +29,7 @@ public class Lancamento {
     private String categoria;
     private String usuarioUltimaAlteracao;
     private LocalDateTime dataUltimaAlteracao;
+    private boolean ativo = true;
 
     @ManyToOne
     @JoinColumn(name = "usuario_id")

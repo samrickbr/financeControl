@@ -110,12 +110,13 @@ public class LancamentoService {
         Lancamento lancamento = repository.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Lançamento", id));
 
+        //validação de segurança
         boolean ehDono = lancamento.getUsuario().getId().equals(usuarioLogado.getId());
         boolean ehAdmin = usuarioLogado.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
         if (!ehDono && !ehAdmin) {
-            throw new RegraNegocioException("Você não tem permissão para alterar este lançamento!");
+            throw new RegraNegocioException("Você não tem permissão para excluir este lançamento!");
         }
 
         logService.registrarLog(

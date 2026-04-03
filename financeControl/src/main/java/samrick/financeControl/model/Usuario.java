@@ -1,16 +1,21 @@
 package samrick.financeControl.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import samrick.financeControl.dto.UsuarioRequestDTO;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
 @Entity
 @Table(name = "usuarios")
+@SQLDelete(sql = "UPDATE usuarios SET ativo = false WHERE id = ?")
+@Where(clause = "ativo = true")
 public class Usuario implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,6 +31,9 @@ public class Usuario implements UserDetails {
 
     @Enumerated(EnumType.STRING)
     private Perfilusuario perfil;
+    private String usuarioUltimaAlteracao;
+    private LocalDateTime dataUltimaAlteracao;
+    private boolean ativo = true;
 
     public Usuario() {
     }
@@ -86,6 +94,39 @@ public class Usuario implements UserDetails {
         this.profissao = profissao;
     }
 
+    public Perfilusuario getPerfil() {
+        return perfil;
+    }
+
+    public void setPerfil(Perfilusuario perfil) {
+        this.perfil = perfil;
+    }
+
+    public String getUsuarioUltimaAlteracao() {
+        return usuarioUltimaAlteracao;
+    }
+
+    public void setUsuarioUltimaAlteracao(String usuarioUltimaAlteracao) {
+        this.usuarioUltimaAlteracao = usuarioUltimaAlteracao;
+    }
+
+    public LocalDateTime getDataUltimaAlteracao() {
+        return dataUltimaAlteracao;
+    }
+
+    public void setDataUltimaAlteracao(LocalDateTime dataUltimaAlteracao) {
+        this.dataUltimaAlteracao = dataUltimaAlteracao;
+    }
+
+    public boolean isAtivo() {
+        return ativo;
+    }
+
+    public void setAtivo(boolean ativo) {
+        this.ativo = ativo;
+    }
+    /*---------------------------------------------------------------------*/
+
     @Override
     public String toString() {
         return "Usuario{" +
@@ -97,6 +138,7 @@ public class Usuario implements UserDetails {
                 ", profissao='" + profissao + '\'' +
                 '}';
     }
+    /*---------------------------------------------------------------------*/
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Size;
 public record UsuarioUpdateDTO(
         @NotNull @Size(min = 5, message = "O campo deve ter no mínimo 5 caracteres")
         String nome,
-        @NotBlank(message = "O email não pode estar em blanco!")
+        @NotBlank(message = "O email não pode estar em branco!")
         @Email(message = "O email deve ser válido!")
         String email,
         @NotNull

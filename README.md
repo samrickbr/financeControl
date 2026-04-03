@@ -74,13 +74,15 @@ src/main/java/com/samrick/financecontrol/
 
 ### 📜 Auditoria de Dados
 
-Sistema de rastreabilidade com:
+#### O sistema foi projetado seguindo as melhores práticas de segurança e rastreabilidade:
 
-* Registro de ações: **CADASTRAR, ALTERAR, EXCLUIR**
-* Armazenamento do estado anterior (JSON)
-* Justificativa obrigatória para alterações
-* Validação de Propriedade: O sistema impede que um usuário altere lançamentos de terceiros, garantindo a privacidade dos dados.
-* Hierarquia de Acesso: Administradores possuem permissão para gerenciar e auditar registros de qualquer usuário.
+***Auditoria em Duas Camadas:***
+
+* ***Log de Eventos:*** Cada operação crítica (Criação, Edição, Exclusão) gera um registro em uma tabela separada de logs, detalhando a ação, o recurso afetado e quem a executou.
+
+* ***Rastro de Entidade (Shadow Fields):*** As entidades possuem os campos `data_ultima_alteracao` e `usuario_ultima_alteracao`, permitindo saber o estado atual do registro diretamente na tabela principal.
+
+* ***Soft Delete:*** A exclusão de usuários e lançamentos não remove os dados fisicamente do banco de dados. Utilizamos a anotação `@SQLDelete` para apenas marcar o registro como inativo (`ativo = false`), preservando o histórico para auditorias futuras.
 
 💡 Ideal para cenários que exigem controle e histórico de mudanças
 
@@ -236,6 +238,18 @@ api.security.token.secret=${JWT_SECRET:frase-secreta-de-senha-forte-aqui-123}
 mvn spring-boot:run
 ```
 
+## 🔑 Acesso Padrão: 
+
+Para facilitar o teste e a avaliação do projeto, implementamos um Database Seeder que prepara o ambiente automaticamente.
+
+1. Primeira Execução: Ao rodar a aplicação pela primeira vez, o sistema detecta se a base de dados está vazia e cria automaticamente um usuário Administrador padrão.
+
+2. Credenciais de Acesso:
+
+* Login: `admin@finance.com`
+
+* Senha: `admin123` (Criptografada com BCrypt no banco)
+
 ---
 
 ## 📈 Próximas Melhorias
@@ -245,7 +259,7 @@ mvn spring-boot:run
 * [x] Autenticação com Spring Security + JWT
 * [x] Controle de acesso por Perfis(ADMIN, USER)
 * [ ] Relatórios financeiros por usuário (mensal/anual)
-* [ ] Soft Delete para usuários e lançamentos
+* [x] Soft Delete para usuários e lançamentos
 * [ ] Documentação com Swagger/OpenAPI
 
 ---
