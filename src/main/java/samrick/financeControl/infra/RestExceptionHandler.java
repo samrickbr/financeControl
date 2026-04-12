@@ -65,12 +65,19 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
             HttpStatusCode status,
             WebRequest request) {
 
+        // Extrai a mensagem real do erro (ex: qual campo falhou no formato)
+        String message = "Dados inválidos.";
+        if (ex.getCause() != null) {
+            // Isso pega o erro específico do Jackson (formato de data, enum, etc)
+            message = "Erro de formato: " + ex.getMostSpecificCause().getMessage();
+        }
+
         StandardError err = new StandardError(
                 LocalDateTime.now(),
                 status.value(),
                 "Erro de Sintaxe no JSON",
-                "Dados inválidos. Verifique o campo 'tipo' (RECEITA/DESPESA) ou o formato da data.",
-                request.getContextPath()
+                message, // Agora usamos a mensagem dinâmica aqui
+                request.getDescription(false)
         );
 
         return ResponseEntity.status(status).body(err);

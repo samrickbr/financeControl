@@ -12,8 +12,10 @@ import samrick.financeControl.dto.RelatorioFinanceiroDTO;
 import samrick.financeControl.exceptions.RecursoNaoEncontradoException;
 import samrick.financeControl.exceptions.RegraNegocioException;
 import samrick.financeControl.mapper.LancamentoMapper;
+import samrick.financeControl.model.Categoria;
 import samrick.financeControl.model.Lancamento;
 import samrick.financeControl.model.Usuario;
+import samrick.financeControl.repository.CategoriaRepository;
 import samrick.financeControl.repository.LancamentoRepository;
 import samrick.financeControl.repository.UsuarioRepository;
 
@@ -32,9 +34,16 @@ public class LancamentoService {
     @Autowired
     private LogAuditoriaService logService;
 
+    @Autowired
+    private CategoriaRepository categoriaRepository;
+
     @Transactional
     public LancamentoResponseDTO salvar(@Valid LancamentoRequestDTO dados, Usuario usuarioLogado) {
         Lancamento novo = mapper.toEntity(dados, usuarioLogado);
+        Categoria categoria = categoriaRepository.findBynomeCategoriaIgnoreCase(dados.categoria())
+                        .orElseThrow(() -> new RecursoNaoEncontradoException("Categoria", 0L));
+
+        novo.setCategoria(categoria);
         novo.setUsuario(usuarioLogado);
 
         Lancamento salvo = repository.save(novo);
@@ -94,11 +103,16 @@ public class LancamentoService {
         );
 
         //atualizar os dados:
+
+        Categoria categoria = categoriaRepository.findBynomeCategoriaIgnoreCase(dto.categoria())
+                        .orElseThrow(() -> new RecursoNaoEncontradoException(
+                                "Categoria não encontrada!", 0L));
+
         lancamento.setValor(dto.valor());
         lancamento.setDescricao(dto.descricao());
         lancamento.setDataVencimento(dto.dataVencimento());
         lancamento.setDataPagamento(dto.dataPagamento());
-        lancamento.setCategoria(dto.categoria());
+        lancamento.setCategoria(categoria);
         lancamento.setTipo(dto.tipo());
         lancamento.setUsuarioUltimaAlteracao((usuarioLogado.getNome()));
         lancamento.setDataUltimaAlteracao(LocalDateTime.now());

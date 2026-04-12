@@ -2,6 +2,7 @@ package samrick.financeControl.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import samrick.financeControl.dto.RelatorioCategoriaDTO;
 import samrick.financeControl.dto.RelatorioMensalDTO;
@@ -26,14 +27,20 @@ public interface LancamentoRepository extends JpaRepository<Lancamento, Long> {
             "AND YEAR(l.dataLancamento) = :ano")
     BigDecimal somarSaidasPorUsuario(Long usuarioId, int mes, int ano);
 
-    @Query("SELECT new samrick.financeControl.dto.RelatorioCategoriaDTO(l.categoria, " +
-            "SUM(l.valor)) FROM Lancamento l WHERE l.usuario.id = :usuarioId AND l.tipo = 'DESPESA' " +
-            "AND MONTH(l.dataLancamento) = :mes AND YEAR(l.dataLancamento) = :ano " +
-            "GROUP BY l.categoria")
-    List<RelatorioCategoriaDTO> buscarGastosPorCategoria(Long usuarioId, int mes, int ano);
+    @Query("SELECT new samrick.financeControl.dto.RelatorioCategoriaDTO(l.categoria.nomeCategoria, SUM(l.valor)) " +
+            "FROM Lancamento l " +
+            "WHERE l.usuario.id = :usuarioId " +
+            "AND l.tipo = 'DESPESA' " +
+            "AND MONTH(l.dataLancamento) = :mes " +
+            "AND YEAR(l.dataLancamento) = :ano " +
+            "GROUP BY l.categoria.nomeCategoria")
+    List<RelatorioCategoriaDTO> buscarGastosPorCategoria(
+            @Param("usuarioId") Long usuarioId,
+            @Param("mes") int mes,
+            @Param("ano") int ano);
 
     // O Spring gera o SQL automaticamente com UPPER(categoria) = UPPER(?)
-    List<Lancamento> findByCategoriaIgnoreCaseAndUsuarioId(String categoria, Long usuarioId);
+    List<Lancamento> findByCategoriaNomeCategoriaIgnoreCaseAndUsuarioId(String categoria, Long usuarioId);
 
     @Query("SELECT new samrick.financeControl.dto.RelatorioMensalDTO(" +
             "MONTH(l.dataLancamento), " +

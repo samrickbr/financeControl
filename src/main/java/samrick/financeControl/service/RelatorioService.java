@@ -34,12 +34,12 @@ public class RelatorioService {
         return repository.buscarGastosPorCategoria(usuarioId, mes, ano);
     }
 
-    public List<Lancamento> findByCategoriaIgnoreCaseAndUsuarioId(String categoria, Long usuarioId){
+    public List<Lancamento> findByNomeCategoriaIgnoreCaseAndUsuarioId(String categoria, Long usuarioId){
         if (categoria == null || categoria.isBlank()){
             return List.of();
         }
 
-        return repository.findByCategoriaIgnoreCaseAndUsuarioId(categoria.trim(), usuarioId);
+        return repository.findByCategoriaNomeCategoriaIgnoreCaseAndUsuarioId(categoria.trim(), usuarioId);
     }
 
     public  RelatorioAnualCompletoDTO obterResumoAnual(int ano){

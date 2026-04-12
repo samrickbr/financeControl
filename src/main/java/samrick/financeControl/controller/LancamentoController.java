@@ -11,12 +11,14 @@ import samrick.financeControl.dto.LancamentoRequestDTO;
 import samrick.financeControl.dto.LancamentoResponseDTO;
 import samrick.financeControl.dto.LancamentoUpdateDTO;
 import samrick.financeControl.model.Lancamento;
+import samrick.financeControl.model.TipoLancamento;
 import samrick.financeControl.model.Usuario;
 import samrick.financeControl.service.LancamentoService;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("/lancamentos")
@@ -94,5 +96,12 @@ public class LancamentoController {
     }
 
     /*-----------------------------------------------------------------*/
-    //
+
+    @GetMapping("/tipos")
+    public ResponseEntity<List<String>> listarTiposLancamentos(){
+        List<String> tipos = Stream.of(TipoLancamento.values())
+                .map(Enum::name)
+                .toList();
+        return ResponseEntity.ok(tipos);
+    }
 }

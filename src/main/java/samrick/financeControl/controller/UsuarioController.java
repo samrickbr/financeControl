@@ -10,12 +10,15 @@ import samrick.financeControl.dto.ExclusaoRequestDTO;
 import samrick.financeControl.dto.UsuarioRequestDTO;
 import samrick.financeControl.dto.UsuarioResponseDTO;
 import samrick.financeControl.dto.UsuarioUpdateDTO;
+import samrick.financeControl.model.PerfilUsuario;
+import samrick.financeControl.model.TipoVinculo;
 import samrick.financeControl.model.Usuario;
 import samrick.financeControl.service.UsuarioService;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("/usuarios")
@@ -43,7 +46,7 @@ public class UsuarioController {
         service.excluir(id, request.justificativa(), usuarioLogado);
 
         Map<String, Object> resposta = new HashMap<>();
-        resposta.put("messagem", "Usuário ID " + id + " excluído com sucesso!");
+        resposta.put("mensagem", "Usuário ID " + id + " excluído com sucesso!");
         return ResponseEntity.ok(resposta);
     }
 
@@ -66,5 +69,21 @@ public class UsuarioController {
         resposta.put("dados", usuarioAtualizado);
 
         return ResponseEntity.ok(resposta);
+    }
+
+    @GetMapping("/tipos-vinculo")
+    public  ResponseEntity<List<String>> listarTiposVinculo(){
+        List<String> tipos = Stream.of(TipoVinculo.values())
+                .map(Enum::name)
+                .toList();
+        return ResponseEntity.ok(tipos);
+    }
+
+    @GetMapping("/perfis")
+    public ResponseEntity<List<String>> listarPerfis(){
+        List<String> perfis = Stream.of(PerfilUsuario.values())
+                .map(Enum::name)
+                .toList();
+        return ResponseEntity.ok(perfis);
     }
 }

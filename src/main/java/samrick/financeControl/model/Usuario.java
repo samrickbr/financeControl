@@ -1,8 +1,6 @@
 package samrick.financeControl.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 import org.springframework.security.core.GrantedAuthority;
@@ -11,9 +9,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import samrick.financeControl.dto.UsuarioRequestDTO;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
 
 @Entity
 @Table(name = "usuarios")
@@ -33,13 +31,17 @@ public class Usuario implements UserDetails {
     private String profissao;
 
     @Enumerated(EnumType.STRING)
-    private Perfilusuario perfil;
+    @Column(name = "perfil")
+    private PerfilUsuario perfil;
     private String usuarioUltimaAlteracao;
     private LocalDateTime dataUltimaAlteracao;
     private boolean ativo = true;
 
+    @ElementCollection(targetClass = TipoVinculo.class, fetch = FetchType.EAGER)
+    @CollectionTable(name = "usuario_vinculos", joinColumns = @JoinColumn(name = "usuario_id"))
     @Enumerated(EnumType.STRING)
-    private TipoVinculo tipoVinculo;
+    @Column(name = "tipoVinculo")
+    private List<TipoVinculo> tiposVinculo = new ArrayList<>();
 
     /*------------------------------------------------------------------------*/
 
@@ -68,7 +70,7 @@ public class Usuario implements UserDetails {
         this.cpf = dados.cpf();
         this.profissao = dados.profissao();
         this.senha = dados.senha();
-        this.tipoVinculo = dados.tipoVinculo();
+        this.tiposVinculo = dados.tiposVinculo();
     }
 
     public Long getId() {
@@ -119,11 +121,11 @@ public class Usuario implements UserDetails {
         this.profissao = profissao;
     }
 
-    public Perfilusuario getPerfil() {
+    public PerfilUsuario getPerfil() {
         return perfil;
     }
 
-    public void setPerfil(Perfilusuario perfil) {
+    public void setPerfil(PerfilUsuario perfil) {
         this.perfil = perfil;
     }
 
@@ -151,14 +153,13 @@ public class Usuario implements UserDetails {
         this.ativo = ativo;
     }
 
-    public TipoVinculo getTipoVinculo() {
-        return tipoVinculo;
+    public List<TipoVinculo> getTiposVinculo() {
+        return tiposVinculo;
     }
 
-    public void setTipoVinculo(TipoVinculo tipoVinculo) {
-        this.tipoVinculo = tipoVinculo;
+    public void setTiposVinculo(List<TipoVinculo> tiposVinculo) {
+        this.tiposVinculo = tiposVinculo;
     }
-
     /*---------------------------------------------------------------------*/
 
     @Override
@@ -176,7 +177,7 @@ public class Usuario implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        if (this.perfil == Perfilusuario.ADMIN) {
+        if (this.perfil == PerfilUsuario.ADMIN) {
             return List.of(new SimpleGrantedAuthority("ROLE_ADMIN"), new SimpleGrantedAuthority("ROLE_USER"));
         }
         return List.of(new SimpleGrantedAuthority("ROLE_USER"));

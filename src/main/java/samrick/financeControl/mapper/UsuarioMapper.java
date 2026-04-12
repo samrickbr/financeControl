@@ -1,14 +1,10 @@
 package samrick.financeControl.mapper;
 
 import org.springframework.stereotype.Component;
-import samrick.financeControl.dto.LancamentoRequestDTO;
 import samrick.financeControl.dto.UsuarioRequestDTO;
 import samrick.financeControl.dto.UsuarioResponseDTO;
 import samrick.financeControl.exceptions.RegraNegocioException;
 import samrick.financeControl.infra.utils.CpfUtils;
-import samrick.financeControl.model.Lancamento;
-import samrick.financeControl.model.TipoLancamento;
-import samrick.financeControl.model.TipoVinculo;
 import samrick.financeControl.model.Usuario;
 
 import java.time.LocalDateTime;
@@ -20,10 +16,12 @@ public class UsuarioMapper {
                 usuario.getId(),
                 usuario.getNome(),
                 usuario.getEmail(),
+                usuario.getCpf(),
                 usuario.getProfissao(),
                 usuario.getDataUltimaAlteracao(),
                 usuario.getUsuarioUltimaAlteracao(),
-                usuario.getTipoVinculo()
+                usuario.getTiposVinculo(),
+                usuario.getPerfil()
         );
     }
 
@@ -38,7 +36,8 @@ public class UsuarioMapper {
         usuario.setEmail(dto.email());
         usuario.setProfissao(dto.profissao());
         usuario.setCpf(dto.cpf());
-        usuario.setTipoVinculo(dto.tipoVinculo());
+        usuario.setTiposVinculo(dto.tiposVinculo());
+        usuario.setPerfil(dto.perfil());
         if (usuarioLogado != null){
             usuario.setUsuarioUltimaAlteracao(usuarioLogado.getNome());
             usuario.setDataUltimaAlteracao(LocalDateTime.now());

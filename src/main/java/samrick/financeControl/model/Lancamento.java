@@ -26,7 +26,9 @@ public class Lancamento {
     private LocalDate dataVencimento;
     private LocalDate dataPagamento;
     private String descricao;
-    private String categoria;
+    @ManyToOne
+    @JoinColumn(name = "categoria_id")
+    private Categoria categoria;
     private String usuarioUltimaAlteracao;
     private LocalDateTime dataUltimaAlteracao;
     private boolean ativo = true;
@@ -95,14 +97,6 @@ public class Lancamento {
         this.descricao = descricao;
     }
 
-    public String getCategoria() {
-        return categoria;
-    }
-
-    public void setCategoria(String categoria) {
-        this.categoria = categoria;
-    }
-
     public Usuario getUsuario() {
         return usuario;
     }
@@ -127,12 +121,17 @@ public class Lancamento {
         this.dataUltimaAlteracao = dataUltimaAlteracao;
     }
 
+    public Categoria getCategoria() {
+        return categoria;
+    }
+
+    public void setCategoria(Categoria categoria) {
+        this.categoria = categoria;
+    }
+
     @PrePersist
     @PreUpdate
     public void padronizarCampos(){
-        if (this.categoria != null){
-            this.categoria = this.categoria.toUpperCase().trim();
-        }
         if (this.descricao != null){
             this.descricao = this.descricao.toUpperCase().trim();
         }

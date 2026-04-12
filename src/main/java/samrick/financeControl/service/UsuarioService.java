@@ -14,7 +14,7 @@ import samrick.financeControl.exceptions.EntidadeEmUsoException;
 import samrick.financeControl.exceptions.RecursoNaoEncontradoException;
 import samrick.financeControl.exceptions.RegraNegocioException;
 import samrick.financeControl.mapper.UsuarioMapper;
-import samrick.financeControl.model.Perfilusuario;
+import samrick.financeControl.model.PerfilUsuario;
 import samrick.financeControl.model.Usuario;
 import samrick.financeControl.repository.LancamentoRepository;
 import samrick.financeControl.repository.UsuarioRepository;
@@ -37,6 +37,7 @@ public class UsuarioService {
     LancamentoRepository lancamentoRepository;
 
     public UsuarioResponseDTO salvar(@Valid UsuarioRequestDTO dados, Usuario usuarioLogado) {
+
         // 1- Validação de email duplicado
         if (repository.existsByEmail(dados.email())) {
             throw new EmailJaCadastradoException();
@@ -47,7 +48,11 @@ public class UsuarioService {
         Usuario novoUsuario = mapper.toEntity(dados, usuarioLogado);
         novoUsuario.setSenha(passwordEncoder.encode(dados.senha()));
         // Segurança: T odo cadastro novo é COMUM, a menos que um ADMIN mude depois
-        novoUsuario.setPerfil(Perfilusuario.COMUM);
+        if (dados.perfil() != null){
+            novoUsuario.setPerfil(dados.perfil());
+        }else {
+            novoUsuario.setPerfil(PerfilUsuario.COMUM);
+        }
         novoUsuario.setAtivo(true);
         // 4. PERSISTÊNCIA
         Usuario salvo = repository.save(novoUsuario);
@@ -113,6 +118,13 @@ public class UsuarioService {
         }
         usuarioAntigo.setCpf(dados.cpf());
         usuarioAntigo.setProfissao(dados.profissao());
+
+        usuarioAntigo.getTiposVinculo().clear();;
+        if (dados.tiposVinculo() != null && !dados.tiposVinculo().isEmpty()){
+            usuarioAntigo.getTiposVinculo().addAll(dados.tiposVinculo());
+        }
+        usuarioAntigo.setPerfil(dados.perfil());
+
         usuarioAntigo.setDataUltimaAlteracao(LocalDateTime.now());
         usuarioAntigo.setUsuarioUltimaAlteracao(usuarioAntigo.getNome());
         return mapper.toDTO(repository.save(usuarioAntigo));

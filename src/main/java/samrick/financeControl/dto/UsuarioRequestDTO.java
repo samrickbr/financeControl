@@ -5,7 +5,10 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import samrick.financeControl.infra.utils.Cpf;
+import samrick.financeControl.model.PerfilUsuario;
 import samrick.financeControl.model.TipoVinculo;
+
+import java.util.List;
 
 public record UsuarioRequestDTO(
         @NotNull @Size(min = 5, message = "O campo deve ter no mínimo 5 caracteres")
@@ -22,6 +25,9 @@ public record UsuarioRequestDTO(
         @NotBlank @Size(min = 5, message = "O campo deve ter no mínimo 5 caracteres")
         String profissao,
         @NotNull(message = "O tipo vinculo é obrigatório.")
-        TipoVinculo tipoVinculo
-) {
+        List<TipoVinculo> tiposVinculo,
+
+        @NotNull(message = "Selecione o perfil do usuario.")
+        PerfilUsuario perfil
+ ) {
 }

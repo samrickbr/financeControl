@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import samrick.financeControl.model.Perfilusuario;
+import samrick.financeControl.model.PerfilUsuario;
 import samrick.financeControl.model.Usuario;
 import samrick.financeControl.repository.UsuarioRepository;
 
@@ -25,7 +25,7 @@ public class DatabaseSeeder implements CommandLineRunner {
             admin.setNome("Administrador");
             admin.setEmail("admin@finance.com");
             admin.setSenha(passwordEncoder.encode("admin123"));
-            admin.setPerfil(Perfilusuario.ADMIN);
+            admin.setPerfil(PerfilUsuario.ADMIN);
             admin.setProfissao("System Admin");
             admin.setCpf("00000000000");
             admin.setAtivo(true);

@@ -24,7 +24,7 @@ public record LancamentoRequestDTO(
 
         @NotBlank @Size(min = 5, message = "O campo deve ter no mínimo 5 caracteres")
         String descricao,
-        @NotNull @Size(min = 5, message = "O campo deve ter no mínimo 5 caracteres")
+        @NotNull @Size(min = 3, message = "O campo deve ter no mínimo 5 caracteres")
         String categoria
 ) {
 }

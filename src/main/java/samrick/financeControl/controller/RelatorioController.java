@@ -49,7 +49,7 @@ public class RelatorioController {
     @GetMapping("/busca-categoria")
     public ResponseEntity<List<LancamentoResponseDTO>> buscarPorCategoria(@RequestParam String nome){
         Usuario logado = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        var resultado = relatorioService.findByCategoriaIgnoreCaseAndUsuarioId(nome, logado.getId());
+        var resultado = relatorioService.findByNomeCategoriaIgnoreCaseAndUsuarioId(nome, logado.getId());
 
         List<LancamentoResponseDTO> listaLimpa = resultado.stream()
                 .map(LancamentoResponseDTO::new)

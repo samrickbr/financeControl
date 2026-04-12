@@ -6,18 +6,18 @@ import samrick.financeControl.exceptions.RegraNegocioException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public enum Perfilusuario {
+public enum PerfilUsuario {
     ADMIN, FINANCEIRO, COMUM;
 
     public static String listarOpcoesPerfil() {
-        return Stream.of(Perfilusuario.values())
+        return Stream.of(PerfilUsuario.values())
                 .map(Enum::name)
                 .collect(Collectors.joining(", "));
     }
 
     @JsonCreator
-    public static Perfilusuario fromValue(String value){
-        for (Perfilusuario perfil : Perfilusuario.values()){
+    public static PerfilUsuario fromValue(String value){
+        for (PerfilUsuario perfil : PerfilUsuario.values()){
             if (perfil.name().toUpperCase().trim().equalsIgnoreCase(value)){
                 return perfil;
             }

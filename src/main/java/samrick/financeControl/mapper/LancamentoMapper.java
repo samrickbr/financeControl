@@ -23,7 +23,6 @@ public class LancamentoMapper {
         lancamento.setDataVencimento(dto.dataVencimento());
         lancamento.setDataPagamento(dto.dataPagamento());
         lancamento.setDescricao(dto.descricao());
-        lancamento.setCategoria(dto.categoria());
         lancamento.setUsuario(usuario);
         return lancamento;
     }
