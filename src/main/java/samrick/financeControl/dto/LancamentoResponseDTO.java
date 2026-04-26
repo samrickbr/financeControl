@@ -28,7 +28,7 @@ public record LancamentoResponseDTO(
                 lancamento.getDataVencimento(),
                 lancamento.getDataPagamento(),
                 lancamento.getDescricao(),
-                String.valueOf(lancamento.getCategoria()),
+                lancamento.getCategoria() != null ? lancamento.getCategoria().getNomeCategoria() : null,
                 lancamento.getUsuario().getNome(),
                 lancamento.getDataUltimaAlteracao(),
                 lancamento.getUsuarioUltimaAlteracao()

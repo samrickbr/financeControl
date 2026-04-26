@@ -70,6 +70,8 @@ src/main/java/samrick/financeControl/
 * ✅ **Integridade de Dados:** Validação de CPF via Annotation customizada e tratamento global de exceções.
 * ✅ **Autenticação JWT:** Proteção de rotas com Stateless Authentication via Bearer Token.
 * ✅ **RBAC (Role-Based Access Control):** Controle de acesso granular por perfis (ADMIN e USER).
+* ✅ **Reativação Inteligente:** Sistema que detecta categorias desativadas e as reativa automaticamente em novos cadastros, evitando duplicidade e lixo no banco.
+* ✅ **Auditoria de Categorias:** Rastreabilidade completa em operações de edição e desativação, exigindo justificativa e vinculando ao usuário logado.
 
 ## 💸 Gestão Financeira e Relatórios
 
@@ -144,12 +146,15 @@ O projeto utiliza uma chave secreta para geração e validação dos tokens. Em 
 
 ## 💸 Lançamentos Financeiros
 
-| Método | Endpoint                       | Descrição                                                  | Acesso     |
-|:-------|:-------------------------------|:-----------------------------------------------------------|:-----------|
-| GET    | `/lancamentos`                 | Lista lançamentos(Dono vê os seus, Admin vê todos          | User/Admin |
-| POST   | `/lancamentos`                 | Cria novo lançamento vinculado ao token                    | User/Admin |
-| PUT    | `/lancamentos/{id}`            | Atualiza com justificativa(Dono ou Admin)                  | User/Admin |
-| GET    | `/lancamentos/busca-categoria` | Filtra lançamentos por nome de categoria(Case Insensitive) | User/Admin |
+| Método | Endpoint                       | Descrição                                                  | Acesso      |
+|:-------|:-------------------------------|:-----------------------------------------------------------|:------------|
+| GET    | `/lancamentos`                 | Lista lançamentos(Dono vê os seus, Admin vê todos          | User/Admin  |
+| POST   | `/lancamentos`                 | Cria novo lançamento vinculado ao token                    | User/Admin  |
+| PUT    | `/lancamentos/{id}`            | Atualiza com justificativa(Dono ou Admin)                  | User/Admin  |
+| GET    | `/lancamentos/busca-categoria` | Filtra lançamentos por nome de categoria(Case Insensitive) | User/Admin  |
+| POST   | `/categorias`                  | Cria ou reativa categoria(Case Insensitive)                | User/Admin  |
+| PUT    | `/categorias/{id}`             | Atualiza nome com justificativa e log                      | User/Admin  |
+| PUT    | `/categorias/{id}/desativar`   | Soft Delete (inativação) com justificativa                 | User/Admin  |
 
 ## 📊 Relatórios e Inteligência
 
@@ -263,6 +268,15 @@ Para acessar as rotas protegidas (como listagem de lançamentos), você deve seg
   "justificativa": "Atualização de valor conforme tabela 2026"
 }
 ```
+---
+**PUT `/categorias/{id}`**
+```json
+{
+  "categoria": "MORADIA",
+  "justificativa": "Ajuste de nomenclatura para padronização do relatório"
+}
+```
+---
 ### 📡 Exemplo de Resumo Anual
 **GET `/relatorios/resumo-anual?ano=2026`**
 ```json
